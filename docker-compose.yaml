@@ -1,0 +1,157 @@
+version: "3.3"
+services:
+
+  # Container 1: Reverse Proxy (HTTPS)
+  nginx:
+    image: orthancteam/orthanc-nginx:24.2.0
+    depends_on: [ orthanc-auth-service, orthanc-for-shares ]
+    restart: unless-stopped
+    volumes: [ "./tls:/etc/nginx/tls" ]
+    environment:
+      ENABLE_ORTHANC: "false"
+      ENABLE_ORTHANC_FOR_SHARES: "true"
+      ENABLE_ORTHANC_TOKEN_SERVICE: "false"
+      ENABLE_HTTPS: "true"
+      ENABLE_OHIF: "true"
+
+  # Container 2: PACS: DIMSE(4242) and DICOMweb(8042)
+  orthanc-for-share:
+    image: orthancteam/orthanc:24.5.0-full
+    depends_on: [ orthanc-auth-service ]
+    restart: unless-stopped
+    volumes:
+      - "/tmp/orthanc-logs-docker:/logs"
+    environment:
+      # Name
+      ORTHANC__NAME: "orthanc"
+      # PACS name
+      ORTHANC__DICOM_AET: "ORTHANC" 
+      # Users with ADM privileges
+      ORTHANC__REGISTERED_USERS: |
+        {
+            "${USER_NAME}": "${USER_PASSWORD}",
+            "healthcheck": "${HEALTHCHECK_PASSWORD}"
+        }
+
+      # Console Logs
+      VERBOSE_ENABLED: "true"
+      VERBOSE_STARTUP: "true"
+
+      # Logs
+      LOGDIR: "/logs"
+      ORTHANC__DE_IDENTIFY_LOGS: "false"
+
+      STONE_WEB_VIEWER_PLUGIN_ENABLED: "true"
+      DICOM_WEB_PLUGIN_ENABLED: "true"
+
+      # Multiple Settings
+      ORTHANC_JSON: |
+        {
+          "OrthancExplorer2": {
+            "IsDefaultUI": true,
+            "UiOptions": {
+              "EnableShares": true,
+              "DefaultShareDuration": 0,
+              "ShareDurations": [0, 7, 15, 30, 90, 365],
+              "EnableOpenInOhifViewer3": true,
+              "OhifViewer3PublicRoot": "http://localhost/orthanc-for-share/ohif/"
+            },
+            "Tokens" : {
+              "ShareType": "stone-viewer-publication"
+            },
+          },
+          "AuthenticationEnabled": false,     // because it is handled by the authorization plugin
+          "Authorization": {
+            "WebServiceRootUrl": "http://orthanc-auth-service:8000/",
+            "WebServiceUsername": "${WEB_SERVICE_USERNAME}",
+            "WebServicePassword": "${WEB_SERVICE_PASSWORD}",
+            // to use OHIF-plugin:  make sure to include "ohif" in the list
+            "StandardConfigurations" : [
+              "osimis-web-viewer",
+              "stone-webviewer",
+              "orthanc-explorer-2",
+              "ohif"
+            ],
+            "CheckedLevel": "studies"
+          },
+          "DicomWeb": {
+            "Enable": true,
+            "PublicRoot": "/orthanc-for-share/dicom-web/"
+          }
+          // replaces the OHIF Container
+          "OHIF": {
+            //"UserConfiguration": "ohif.js",
+            "DataSource": "dicom-web",
+            "RouterBasename": "/orthanc-for-share/ohif/"
+          }
+        }
+
+      # Change storage to PostgreSQL 
+      # Turn off the default sqLite Database 
+      # Change indexing to PostegreSQL
+      POSTGRESQL_PLUGIN_ENABLED:
+        {
+          "EnableIndex": true,
+          "Host": "${HOST}",
+          "Port": "${PORT}",
+          "Database": "${DATABASE}",
+          "Username": "${USERNAME}",
+          "Password": "${PASSWORD}",
+          "EnableSsl": false // Set true if you need configure HTTPS for RDS
+        }
+
+      # Switch storage to AWS S3
+      # Turn off the default File System storage system
+      AWS_S3_STORAGE_PLUGIN_ENABLED:
+        {
+          "BucketName": "${BUCKET_NAME}",
+          "Region": "${REGION}",
+          "AccessKey": "${ACCESS_KEY}",
+          "SecretKey": "${SECRET_KEY}",
+          "StorageStructure": "flat",
+          "UseTransferManager": true
+        }
+
+    # Activate a healthcheck service
+    labels:
+      - "autoheal=true"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/probes/test-aliveness.py --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD}"
+        ]
+      start_period: 10s
+      retries: 2
+      interval: 3s
+      timeout: 2s
+
+  # Container 3: Authorization
+  orthanc-auth-service:
+    image: orthancteam/orthanc-auth-service:24.2.0
+    volumes:
+      - ./permissions.jsonc:/orthanc_auth_service/permissions.json
+    restart: unless-stopped
+    environment:
+      PUBLIC_ORTHANC_ROOT: "http://localhost/shares/"
+      PUBLIC_LANDING_ROOT: "http://localhost/shares/ui/app/token-landing.html"
+      PUBLIC_OHIF_ROOT: "http://localhost/orthanc/ohif/"
+      USERS: |
+        {
+          "${WEB_SERVICE_USERNAME}": "${WEB_SERVICE_PASSWORD}"
+        }
+
+  # Container 4: Supervision
+  # Activate an AutoHeal service
+  # If healthcheck is false or unhealth restarts the instance
+  # Uses the Unix Domain Socket to communicate.
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    tty: true
+    container_name: autoheal
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  nginx-tls:
