@@ -6,7 +6,8 @@ services:
     image: orthancteam/orthanc-nginx:24.2.0
     depends_on: [ orthanc-auth-service, orthanc-for-shares ]
     restart: unless-stopped
-    volumes: [ "./tls:/etc/nginx/tls" ]
+    volumes:
+      - "./tls:/etc/nginx/tls"
     environment:
       ENABLE_ORTHANC: "false"
       ENABLE_ORTHANC_FOR_SHARES: "true"
@@ -35,7 +36,7 @@ services:
       # Name
       ORTHANC__NAME: "orthanc"
       # PACS name
-      ORTHANC__DICOM_AET: "ORTHANC" 
+      ORTHANC__DICOM_AET: "ORTHANC"
       # Users with ADM privileges
       ORTHANC__REGISTERED_USERS: |
         {
@@ -165,3 +166,5 @@ services:
 
 volumes:
   nginx-tls:
+  orthanc-logs:
+  orthanc-auth-permissions:
