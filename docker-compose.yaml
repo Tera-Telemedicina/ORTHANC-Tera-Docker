@@ -14,6 +14,16 @@ services:
       ENABLE_HTTPS: "true"
       ENABLE_OHIF: "true"
 
+  # Container 2: OHIF
+  ohif:
+    build: ohif
+    # optional if you want to customize the OHIF configuration:
+    volumes:
+      - ./ohif/default-app-config.js:/usr/share/nginx/html/app-config.js
+    restart: unless-stopped
+    depends_on:
+      - orthanc-for-share
+
   # Container 2: PACS: DIMSE(4242) and DICOMweb(8042)
   orthanc-for-share:
     image: orthancteam/orthanc:24.5.0-full
@@ -54,7 +64,7 @@ services:
               "DefaultShareDuration": 0,
               "ShareDurations": [0, 7, 15, 30, 90, 365],
               "EnableOpenInOhifViewer3": true,
-              "OhifViewer3PublicRoot": "http://localhost/orthanc-for-share/ohif/"
+              "OhifViewer3PublicRoot": "http://localhost/ohif/"
             },
             "Tokens" : {
               "ShareType": "stone-viewer-publication"
@@ -82,7 +92,7 @@ services:
           "OHIF": {
             //"UserConfiguration": "ohif.js",
             "DataSource": "dicom-web",
-            "RouterBasename": "/orthanc-for-share/ohif/"
+            "RouterBasename": "/ohif/"
           }
         }
 
@@ -135,7 +145,7 @@ services:
     environment:
       PUBLIC_ORTHANC_ROOT: "http://localhost/shares/"
       PUBLIC_LANDING_ROOT: "http://localhost/shares/ui/app/token-landing.html"
-      PUBLIC_OHIF_ROOT: "http://localhost/orthanc/ohif/"
+      PUBLIC_OHIF_ROOT: "http://localhost/ohif/"
       USERS: |
         {
           "${WEB_SERVICE_USERNAME}": "${WEB_SERVICE_PASSWORD}"

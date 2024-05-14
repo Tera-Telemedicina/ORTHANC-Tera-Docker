@@ -152,5 +152,5 @@ Create a certificate in [Let's Encrypt](https://letsencrypt.org/) and place the 
 So just use 
 
 ```shell
-$    docker compose up
+$    docker compose up --build
 ```
