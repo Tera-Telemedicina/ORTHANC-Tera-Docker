@@ -16,16 +16,6 @@ services:
       ENABLE_HTTPS: "true"
       ENABLE_OHIF: "true"
 
-  # Container 2: OHIF
-  ohif:
-    build: ohif
-    # optional if you want to customize the OHIF configuration:
-    volumes:
-      - ./ohif/default-app-config.js:/usr/share/nginx/html/app-config.js
-    restart: unless-stopped
-    depends_on:
-      - orthanc-for-share
-
   # Container 2: PACS: DIMSE(4242) and DICOMweb(8042)
   orthanc-for-share:
     image: orthancteam/orthanc:24.5.0-full
@@ -124,6 +114,12 @@ services:
             "UseTransferManager": true
           }
         }
+
+    OHIF_PLUGIN_ENABLED: "true"
+    ORTHANC__OHIF: |
+      {
+        "DataSource" : "dicom-web"
+      } 
 
     # Activate a healthcheck service
     labels:
