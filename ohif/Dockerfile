@@ -24,7 +24,7 @@ RUN mkdir /etc/nginx/enabled-sites
 RUN mkdir /scripts
 
 COPY ohif-static.conf /etc/nginx/enabled-sites/
-ADD ohif-nginx-http.conf /etc/nginx/conf.d/default.conf
+# ADD ohif-nginx-http.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=builder /sources/Viewers/platform/app/dist /usr/share/nginx/html/
 COPY default-app-config.js /usr/share/nginx/html/app-config.js
