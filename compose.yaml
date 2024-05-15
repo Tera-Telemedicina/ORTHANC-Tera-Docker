@@ -5,19 +5,24 @@ services:
   nginx:
     # image: orthancteam/orthanc-nginx:24.2.0
     build: nginx
-    depends_on: [ orthanc-auth-service, orthanc-for-share ]
+    depends_on: [ orthanc-auth-service, orthanc, ohif ]
     restart: unless-stopped
+    ports:
+      - 80:80
     volumes:
       - "./tls:/etc/nginx/tls"
-    environment:
-      ENABLE_ORTHANC: "false"
-      ENABLE_ORTHANC_FOR_SHARES: "true"
-      ENABLE_ORTHANC_TOKEN_SERVICE: "false"
-      ENABLE_HTTPS: "true"
-      ENABLE_OHIF: "true"
 
-  # Container 2: PACS: DIMSE(4242) and DICOMweb(8042)
-  orthanc-for-share:
+  # Container 2: Viewer
+  ohif:
+    build: ohif
+    volumes:
+      - ./ohif/default-app-config.js:/usr/share/nginx/html/app-config.js
+    restart: unless-stopped
+    depends_on:
+      - orthanc
+
+  # Container 3: PACS: DIMSE(4242) and DICOMweb(8042)
+  orthanc:
     image: orthancteam/orthanc:24.5.0-full
     depends_on: [ orthanc-auth-service ]
     restart: unless-stopped
@@ -83,18 +88,16 @@ services:
             "WebServiceRootUrl": "http://orthanc-auth-service:8000/",
             "WebServiceUsername": "${WEB_SERVICE_USERNAME}",
             "WebServicePassword": "${WEB_SERVICE_PASSWORD}",
-            // to use OHIF-plugin:  make sure to include "ohif" in the list
             "StandardConfigurations": [
               "osimis-web-viewer",
               "stone-webviewer",
               "orthanc-explorer-2",
-              "ohif"
             ],
             "CheckedLevel": "studies"
           },
           "DicomWeb": {
             "Enable": true,
-            "PublicRoot": "/orthanc-for-share/dicom-web/"
+            "PublicRoot": "/orthanc/dicom-web/"
           },
           "PostgreSQL": {
             "EnableIndex": true,
@@ -115,12 +118,6 @@ services:
           }
         }
 
-    OHIF_PLUGIN_ENABLED: "true"
-    ORTHANC__OHIF: |
-      {
-        "DataSource" : "dicom-web"
-      } 
-
     # Activate a healthcheck service
     labels:
       - "autoheal=true"
@@ -135,7 +132,7 @@ services:
       interval: 3s
       timeout: 2s
 
-  # Container 3: Authorization
+  # Container 4: Authorization
   orthanc-auth-service:
     image: orthancteam/orthanc-auth-service:24.2.0
     volumes:
@@ -150,7 +147,7 @@ services:
           "${WEB_SERVICE_USERNAME}": "${WEB_SERVICE_PASSWORD}"
         }
 
-  # Container 4: Supervision
+  # Container 5: Supervision
   # Activate an AutoHeal service
   # If healthcheck is false or unhealth restarts the instance
   # Uses the Unix Domain Socket to communicate.
