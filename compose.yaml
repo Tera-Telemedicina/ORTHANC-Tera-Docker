@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3"
 services:
 
   # Container 1: Reverse Proxy (HTTPS)
@@ -88,12 +88,6 @@ services:
           "DicomWeb": {
             "Enable": true,
             "PublicRoot": "/orthanc-for-share/dicom-web/"
-          }
-          // replaces the OHIF Container
-          "OHIF": {
-            //"UserConfiguration": "ohif.js",
-            "DataSource": "dicom-web",
-            "RouterBasename": "/ohif/"
           }
         }
 
