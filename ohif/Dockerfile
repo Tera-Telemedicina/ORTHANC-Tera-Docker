@@ -18,7 +18,7 @@ RUN QUICK_BUILD=true PUBLIC_URL=/ohif/ yarn run build
 
 ######################################################
 
-FROM nginx:1.25
+FROM nginx:1.25-alpine
 
 RUN mkdir /etc/nginx/enabled-sites
 RUN mkdir /scripts
