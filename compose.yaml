@@ -3,8 +3,9 @@ services:
 
   # Container 1: Reverse Proxy (HTTPS)
   nginx:
-    image: orthancteam/orthanc-nginx:24.2.0
-    depends_on: [ orthanc-auth-service, orthanc-for-shares ]
+    # image: orthancteam/orthanc-nginx:24.2.0
+    build: nginx
+    depends_on: [ orthanc-auth-service, orthanc-for-share ]
     restart: unless-stopped
     volumes:
       - "./tls:/etc/nginx/tls"
@@ -55,6 +56,15 @@ services:
       STONE_WEB_VIEWER_PLUGIN_ENABLED: "true"
       DICOM_WEB_PLUGIN_ENABLED: "true"
 
+      # Switch storage to AWS S3
+      # Turn off the default File System storage system
+      AWS_S3_STORAGE_PLUGIN_ENABLED: "true"
+
+      # Change storage to PostgreSQL 
+      # Turn off the default sqLite Database 
+      # Change indexing to PostegreSQL
+      POSTGRESQL_PLUGIN_ENABLED: "true"
+
       # Multiple Settings
       ORTHANC_JSON: |
         {
@@ -63,21 +73,28 @@ services:
             "UiOptions": {
               "EnableShares": true,
               "DefaultShareDuration": 0,
-              "ShareDurations": [0, 7, 15, 30, 90, 365],
+              "ShareDurations": [
+                0,
+                7,
+                15,
+                30,
+                90,
+                365
+              ],
               "EnableOpenInOhifViewer3": true,
               "OhifViewer3PublicRoot": "http://localhost/ohif/"
             },
-            "Tokens" : {
+            "Tokens": {
               "ShareType": "stone-viewer-publication"
             },
           },
-          "AuthenticationEnabled": false,     // because it is handled by the authorization plugin
+          "AuthenticationEnabled": false, // because it is handled by the authorization plugin
           "Authorization": {
             "WebServiceRootUrl": "http://orthanc-auth-service:8000/",
             "WebServiceUsername": "${WEB_SERVICE_USERNAME}",
             "WebServicePassword": "${WEB_SERVICE_PASSWORD}",
             // to use OHIF-plugin:  make sure to include "ohif" in the list
-            "StandardConfigurations" : [
+            "StandardConfigurations": [
               "osimis-web-viewer",
               "stone-webviewer",
               "orthanc-explorer-2",
@@ -88,33 +105,24 @@ services:
           "DicomWeb": {
             "Enable": true,
             "PublicRoot": "/orthanc-for-share/dicom-web/"
+          },
+          "PostgreSQL": {
+            "EnableIndex": true,
+            "Host": "${HOST}",
+            "Port": "${PORT}",
+            "Database": "${DATABASE}",
+            "Username": "${USERNAME}",
+            "Password": "${PASSWORD}",
+            "EnableSsl": false // Set true if you need configure HTTPS for RDS
+          },
+          "AwsS3Storage": {
+            "BucketName": "${BUCKET_NAME}",
+            "Region": "${REGION}",
+            "AccessKey": "${ACCESS_KEY}",
+            "SecretKey": "${SECRET_KEY}",
+            "StorageStructure": "flat",
+            "UseTransferManager": true
           }
-        }
-
-      # Change storage to PostgreSQL 
-      # Turn off the default sqLite Database 
-      # Change indexing to PostegreSQL
-      POSTGRESQL_PLUGIN_ENABLED:
-        {
-          "EnableIndex": true,
-          "Host": "${HOST}",
-          "Port": "${PORT}",
-          "Database": "${DATABASE}",
-          "Username": "${USERNAME}",
-          "Password": "${PASSWORD}",
-          "EnableSsl": false // Set true if you need configure HTTPS for RDS
-        }
-
-      # Switch storage to AWS S3
-      # Turn off the default File System storage system
-      AWS_S3_STORAGE_PLUGIN_ENABLED:
-        {
-          "BucketName": "${BUCKET_NAME}",
-          "Region": "${REGION}",
-          "AccessKey": "${ACCESS_KEY}",
-          "SecretKey": "${SECRET_KEY}",
-          "StorageStructure": "flat",
-          "UseTransferManager": true
         }
 
     # Activate a healthcheck service
