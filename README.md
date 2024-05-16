@@ -142,9 +142,9 @@ $    systemctl --user enable docker-desktop
 
 Create a `.env` file with the same keys as `.env.example`
 
-Crie a pasta **tls**
+Create the **tls** folder and container log folders
 ```shell
-$    mkdir tls
+$    mkdir -p tls temp/orthancADM-logs-docker temp/orthancSHARE-logs-docker
 ```
 
 Create a certificate in [Let's Encrypt](https://letsencrypt.org/) and place the .pem and .key file in the tls folder.
