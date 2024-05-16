@@ -1,6 +1,7 @@
 # A robust PACS configuration for ORTHANC
 
-## Docker Installation
+<details>
+<summary><h1>Docker Installation</h1></summary>
 
 ### Installing KVM
 
@@ -137,6 +138,7 @@ To start when turning on Linux:
 ```shell
 $    systemctl --user enable docker-desktop
 ```
+</details>
 
 ## Configuring the project:
 
