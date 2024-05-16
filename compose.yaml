@@ -1,4 +1,3 @@
-version: "3"
 services:
 
   # Container 1: Reverse Proxy (HTTPS)
@@ -7,8 +6,6 @@ services:
     build: nginx
     depends_on: [ orthanc-auth-service, orthanc, ohif ]
     restart: unless-stopped
-    ports:
-      - 80:80
     volumes:
       - "./tls:/etc/nginx/tls"
 
@@ -27,7 +24,8 @@ services:
     depends_on: [ orthanc-auth-service ]
     restart: unless-stopped
     volumes:
-      - "/tmp/orthanc-logs-docker:/logs"
+      - "./tmp/orthanc-logs-docker:/logs"
+      - ./orthanc.json:/etc/orthanc/orthanc.json:ro
     environment:
       # Name
       ORTHANC__NAME: "orthanc"
@@ -60,64 +58,6 @@ services:
       # Change indexing to PostegreSQL
       POSTGRESQL_PLUGIN_ENABLED: "true"
 
-      # Multiple Settings
-      ORTHANC_JSON: |
-        {
-          "OrthancExplorer2": {
-            "IsDefaultUI": true,
-            "UiOptions": {
-              "EnableShares": true,
-              "DefaultShareDuration": 0,
-              "ShareDurations": [
-                0,
-                7,
-                15,
-                30,
-                90,
-                365
-              ],
-              "EnableOpenInOhifViewer3": true,
-              "OhifViewer3PublicRoot": "http://localhost/ohif/"
-            },
-            "Tokens": {
-              "ShareType": "stone-viewer-publication"
-            },
-          },
-          "AuthenticationEnabled": false, // because it is handled by the authorization plugin
-          "Authorization": {
-            "WebServiceRootUrl": "http://orthanc-auth-service:8000/",
-            "WebServiceUsername": "${WEB_SERVICE_USERNAME}",
-            "WebServicePassword": "${WEB_SERVICE_PASSWORD}",
-            "StandardConfigurations": [
-              "osimis-web-viewer",
-              "stone-webviewer",
-              "orthanc-explorer-2",
-            ],
-            "CheckedLevel": "studies"
-          },
-          "DicomWeb": {
-            "Enable": true,
-            "PublicRoot": "/orthanc/dicom-web/"
-          },
-          "PostgreSQL": {
-            "EnableIndex": true,
-            "Host": "${HOST}",
-            "Port": "${PORT}",
-            "Database": "${DATABASE}",
-            "Username": "${USERNAME}",
-            "Password": "${PASSWORD}",
-            "EnableSsl": false // Set true if you need configure HTTPS for RDS
-          },
-          "AwsS3Storage": {
-            "BucketName": "${BUCKET_NAME}",
-            "Region": "${REGION}",
-            "AccessKey": "${ACCESS_KEY}",
-            "SecretKey": "${SECRET_KEY}",
-            "StorageStructure": "flat",
-            "UseTransferManager": true
-          }
-        }
-
     # Activate a healthcheck service
     labels:
       - "autoheal=true"
@@ -142,6 +82,7 @@ services:
       PUBLIC_ORTHANC_ROOT: "http://localhost/shares/"
       PUBLIC_LANDING_ROOT: "http://localhost/shares/ui/app/token-landing.html"
       PUBLIC_OHIF_ROOT: "http://localhost/ohif/"
+      SECRET_KEY: "${SECRET_KEY}"
       USERS: |
         {
           "${WEB_SERVICE_USERNAME}": "${WEB_SERVICE_PASSWORD}"
