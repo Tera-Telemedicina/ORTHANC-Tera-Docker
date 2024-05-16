@@ -1,8 +1,8 @@
 ######################################################
 
-FROM node:20.13.1-alpine3.19 as builder
+FROM node:20.13.1-slim as builder
 
-RUN apt-get update && apt-get install -y --no-install-recommends git=2.45.1 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git=1:2.39.2-1.1 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /sources
 RUN git clone https://github.com/OHIF/Viewers.git
