@@ -2,30 +2,33 @@ services:
 
   # Container 1: Reverse Proxy (HTTPS)
   nginx:
-    # image: orthancteam/orthanc-nginx:24.2.0
-    build: nginx
-    depends_on: [ orthanc-auth-service, orthanc, ohif ]
+    image: orthancteam/orthanc-nginx:24.5.0
+    depends_on: [orthanc, orthanc-auth-service, orthanc-for-shares]
     restart: unless-stopped
+    ports: ["443:443"]
     volumes:
       - "./tls:/etc/nginx/tls"
+    environment:
+      ENABLE_ORTHANC: "true"
+      ENABLE_ORTHANC_FOR_SHARES: "true"
+      ENABLE_ORTHANC_TOKEN_SERVICE: "false"
+      ENABLE_HTTPS: "true"
+      ENABLE_OHIF: "true" 
 
   # Container 2: Viewer
   ohif:
-    build: ohif
+    image: orthancteam/ohif-v3:24.5.0
     volumes:
-      - ./ohif/default-app-config.js:/usr/share/nginx/html/app-config.js
+      - ./ohif-app-config.js:/usr/share/nginx/html/app-config.js
     restart: unless-stopped
-    depends_on:
-      - orthanc
 
-  # Container 3: PACS: DIMSE(4242) and DICOMweb(8042)
+  #Container 3: ORTHANC PACS (DISME e DICOMweb)
   orthanc:
-    image: orthancteam/orthanc:24.5.0-full
-    depends_on: [ orthanc-auth-service ]
+    image: orthancteam/orthanc:24.5.0
     restart: unless-stopped
     volumes:
-      - "./tmp/orthanc-logs-docker:/logs"
-      - ./orthanc.json:/etc/orthanc/orthanc.json:ro
+      - "./tmp/orthancADM-logs-docker:/logs"
+      - ./orthancADM.json:/etc/orthanc/orthanc.json:ro
     environment:
       # Name
       ORTHANC__NAME: "orthanc"
@@ -34,7 +37,7 @@ services:
       # Users with ADM privileges
       ORTHANC__REGISTERED_USERS: |
         {
-            "${USER_NAME}": "${USER_PASSWORD}",
+            "${ADM_NAME}": "${ADM_PASSWORD}",
             "healthcheck": "${HEALTHCHECK_PASSWORD}"
         }
 
@@ -65,18 +68,66 @@ services:
       test:
         [
           "CMD-SHELL",
-          "/probes/test-aliveness.py --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD}"
+          "/probes/test-aliveness.py --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD} >> /logs/healthcheck.log.$(date +'%Y%m%d-%H%M%S').1 2>&1"
         ]
       start_period: 10s
       retries: 2
       interval: 3s
       timeout: 2s
 
-  # Container 4: Authorization
-  orthanc-auth-service:
-    image: orthancteam/orthanc-auth-service:24.2.0
+  # Container 5: Manage Share Tokens
+  orthanc-for-shares:
+    image: orthancteam/orthanc:24.5.0
+    restart: unless-stopped
     volumes:
-      - ./permissions.jsonc:/orthanc_auth_service/permissions.json
+      - "./tmp/orthancSHARE-logs-docker:/logs"
+      - ./orthancSHARE.json:/etc/orthanc/orthanc.json:ro
+    environment:
+      # Name
+      ORTHANC__NAME: "orthancFS"
+      # Users with ADM privileges
+      ORTHANC__REGISTERED_USERS: |
+        {
+            "healthcheck": "${HEALTHCHECK_PASSWORD}"
+        }
+
+      # Console Logs
+      VERBOSE_ENABLED: "true"
+      VERBOSE_STARTUP: "true"
+
+      # Logs
+      LOGDIR: "/logs"
+      ORTHANC__DE_IDENTIFY_LOGS: "false"
+
+      STONE_WEB_VIEWER_PLUGIN_ENABLED: "true"
+      DICOM_WEB_PLUGIN_ENABLED: "true"
+
+      # Switch storage to AWS S3
+      # Turn off the default File System storage system
+      AWS_S3_STORAGE_PLUGIN_ENABLED: "true"
+
+      # Change storage to PostgreSQL 
+      # Turn off the default sqLite Database 
+      # Change indexing to PostegreSQL
+      POSTGRESQL_PLUGIN_ENABLED: "true"
+
+    # Activate a healthcheck service
+    labels:
+      - "autoheal=true"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/probes/test-aliveness.py --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD} >> /logs/healthcheck.log.$(date +'%Y%m%d-%H%M%S').1 2>&1"
+        ]
+      start_period: 10s
+      retries: 2
+      interval: 3s
+      timeout: 2s
+
+  # Container 5: Authorization
+  orthanc-auth-service:
+    image: orthancteam/orthanc-auth-service:24.5.0
     restart: unless-stopped
     environment:
       PUBLIC_ORTHANC_ROOT: "http://localhost/shares/"
@@ -88,7 +139,7 @@ services:
           "${WEB_SERVICE_USERNAME}": "${WEB_SERVICE_PASSWORD}"
         }
 
-  # Container 5: Supervision
+  # Container 6: Supervision
   # Activate an AutoHeal service
   # If healthcheck is false or unhealth restarts the instance
   # Uses the Unix Domain Socket to communicate.
@@ -103,4 +154,3 @@ services:
 volumes:
   nginx-tls:
   orthanc-logs:
-  orthanc-auth-permissions:

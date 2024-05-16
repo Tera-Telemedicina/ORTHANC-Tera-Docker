@@ -1,0 +1,58 @@
+// Change all values that are as environment variables for Docker Compose to the actual values of the secrets.
+
+// Or use this json in the environment variable inside Docker Compose ORTHANC_JSON:
+
+{
+    "OrthancExplorer2": {
+        "IsDefaultUI": true,
+        "UiOptions": {
+            "EnableShares": true,
+            "DefaultShareDuration": 0,
+            "ShareDurations": [
+                0,
+                1,
+                7,
+                15,
+                30,
+                90,
+                365
+            ]
+        },
+        "Tokens": {
+            "ShareType": "ohif-viewer-publication"
+        }
+    },
+    "AuthenticationEnabled": false,
+    "Authorization": {
+        "WebServiceRootUrl": "http://orthanc-auth-service:8000/",
+        "WebServiceUsername": "${WEB_SERVICE_USERNAME}",
+        "WebServicePassword": "${WEB_SERVICE_PASSWORD}",
+        "StandardConfigurations": [
+            "stone-webviewer",
+            "orthanc-explorer-2",
+            "ohif"
+        ],
+        "CheckedLevel": "studies"
+    },
+    "DicomWeb": {
+        "Enable": true,
+        "PublicRoot": "/orthanc/dicom-web/"
+    },
+    PostgreSQL": {
+        "EnableIndex": true,
+        "Host": "${HOST}",
+        "Port": "${PORT}",
+        "Database": "${DATABASE}",
+        "Username": "${USERNAME}",
+        "Password": "${PASSWORD}",
+        "EnableSsl": true
+    },
+    "AwsS3Storage": {
+        "BucketName": "${BUCKET_NAME}",
+        "Region": "${REGION}",
+        "AccessKey": "${ACCESS_KEY}",
+        "SecretKey": "${SECRET_KEY}",
+        "StorageStructure": "flat",
+        "UseTransferManager": true
+    }
+}
