@@ -18,8 +18,8 @@ services:
   # Container 2: Viewer
   ohif:
     image: orthancteam/ohif-v3:24.5.0
-    volumes:
-      - ./ohif-app-config.js:/usr/share/nginx/html/app-config.js
+    #volumes:
+      #- ./ohif-app-config.js:/usr/share/nginx/html/app-config.js
     restart: unless-stopped
 
   #Container 3: ORTHANC PACS (DISME e DICOMweb)
