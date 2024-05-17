@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     ports: ["443:443"]
     volumes:
-      - "./tls:/etc/nginx/tls"
+      - ./tls:/etc/nginx/tls
     environment:
       ENABLE_ORTHANC: "true"
       ENABLE_ORTHANC_FOR_SHARES: "true"
@@ -27,7 +27,7 @@ services:
     image: orthancteam/orthanc:24.5.0
     restart: unless-stopped
     volumes:
-      - "./tmp/orthancADM-logs-docker:/logs"
+      - ./tmp/orthancADM-logs-docker:/logs
       - ./orthancADM.json:/etc/orthanc/orthanc.json:ro
     environment:
       # Name
@@ -80,9 +80,9 @@ services:
     image: orthancteam/orthanc:24.5.0
     restart: unless-stopped
     volumes:
-      - "./tmp/orthancSHARE-logs-docker:/logs"
+      - ./tmp/orthancSHARE-logs-docker:/logs
       - ./orthancSHARE.json:/etc/orthanc/orthanc.json:ro
-      - "./tls:/tls"
+      - ./tls:/tls
     environment:
       # Name
       ORTHANC__NAME: "orthancFS"
@@ -112,9 +112,9 @@ services:
     image: orthancteam/orthanc-auth-service:24.5.0
     restart: unless-stopped
     environment:
-      PUBLIC_ORTHANC_ROOT: "{PUBLIC_ORTHANC_ROOT}"
-      PUBLIC_LANDING_ROOT: "{PUBLIC_LANDING_ROOT}"
-      PUBLIC_OHIF_ROOT: "{PUBLIC_OHIF_ROOT}"
+      PUBLIC_ORTHANC_ROOT: "${PUBLIC_ORTHANC_ROOT}"
+      PUBLIC_LANDING_ROOT: "${PUBLIC_LANDING_ROOT}"
+      PUBLIC_OHIF_ROOT: "${PUBLIC_OHIF_ROOT}"
       SECRET_KEY: "${SECRET_KEY}"
       USERS: |
         {
