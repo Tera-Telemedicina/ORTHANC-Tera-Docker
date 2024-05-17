@@ -86,11 +86,6 @@ services:
     environment:
       # Name
       ORTHANC__NAME: "orthancFS"
-      # Users with ADM privileges
-      ORTHANC__REGISTERED_USERS: |
-        {
-            "healthcheck": "${HEALTHCHECK_PASSWORD}"
-        }
 
       # Console Logs
       VERBOSE_ENABLED: "true"
@@ -111,20 +106,6 @@ services:
       # Turn off the default sqLite Database 
       # Change indexing to PostegreSQL
       POSTGRESQL_PLUGIN_ENABLED: "true"
-
-    # Activate a healthcheck service
-    labels:
-      - "autoheal=true"
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "/probes/test-aliveness.py --certfile=/tls/crt.pem --keyfile=/tls/key.pem --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD} >> /logs/healthcheck.log.$(date +'%Y%m%d-%H%M%S').1 2>&1"
-        ]
-      start_period: 10s
-      retries: 2
-      interval: 3s
-      timeout: 2s
 
   # Container 5: Authorization
   orthanc-auth-service:
