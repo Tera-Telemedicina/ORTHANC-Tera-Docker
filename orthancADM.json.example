@@ -18,7 +18,7 @@
                 365
             ],
             "EnableOpenInOhifViewer3": true,
-            "OhifViewer3PublicRoot": "http://localhost/ohif/"
+            "OhifViewer3PublicRoot": "http://"${APP_URL}"/ohif/"
         },
         "Tokens": {
             "InstantLinksValidity": 3600,
