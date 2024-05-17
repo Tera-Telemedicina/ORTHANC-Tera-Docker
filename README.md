@@ -146,7 +146,7 @@ Create a `.env` file with the same keys as `.env.example`
 
 Create the **tls** folder and container log folders
 ```shell
-$    mkdir -p tls temp/orthancADM-logs-docker temp/orthancSHARE-logs-docker
+$    mkdir -p tls tmp/orthancADM-logs-docker tmp/orthancSHARE-logs-docker
 ```
 
 Create a certificate in [Let's Encrypt](https://letsencrypt.org/) and place the .pem and .key file in the tls folder.
