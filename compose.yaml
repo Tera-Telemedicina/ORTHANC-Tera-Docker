@@ -82,6 +82,7 @@ services:
     volumes:
       - "./tmp/orthancSHARE-logs-docker:/logs"
       - ./orthancSHARE.json:/etc/orthanc/orthanc.json:ro
+      - "./tls:/tls"
     environment:
       # Name
       ORTHANC__NAME: "orthancFS"
@@ -118,7 +119,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "/probes/test-aliveness.py --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD} >> /logs/healthcheck.log.$(date +'%Y%m%d-%H%M%S').1 2>&1"
+          "/probes/test-aliveness.py --certfile=/tls/crt.pem --keyfile=/tls/key.pem --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD} >> /logs/healthcheck.log.$(date +'%Y%m%d-%H%M%S').1 2>&1"
         ]
       start_period: 10s
       retries: 2
