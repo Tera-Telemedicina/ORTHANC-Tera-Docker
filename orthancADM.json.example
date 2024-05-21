@@ -3,33 +3,51 @@
 // Or use this json in the environment variable inside Docker Compose ORTHANC_JSON:
 
 {
+    "Name": "${NAME_YOUR_PACS}",
+    "ConcurrentJobs": 0,
+    "JobsEngineThreadsCount": {
+        "ResourceModification": 1
+    },
+    "HttpServerEnabled": true,
+    "HttpPort": 8042,
+    "HttpDescribeErrors": true,
+    "HttpCompressionEnabled": false,
+    "WebDavEnabled": false,
+    "WebDavDeleteAllowed": false,
+    "WebDavUploadAllowed": false,
+    "DicomServerEnabled": true,
+    "DicomAet": "Tera-Pacs",
+    "DicomCheckCalledAet": true,
+    "DicomPort": 4242,
+    "DefaultEncoding": "UTF8",
+    "AcceptedTransferSyntaxes": [
+        "1.2.840.10008.1.*"
+    ],
+    "DeflatedTransferSyntaxAccepted": true,
+    "JpegTransferSyntaxAccepted": true,
+    "Jpeg2000TransferSyntaxAccepted": true,
+    "JpegLosslessTransferSyntaxAccepted": true,
+    "JpipTransferSyntaxAccepted": true,
+    "Mpeg2TransferSyntaxAccepted": true,
+    "RleTransferSyntaxAccepted": true,
+    "Mpeg4TransferSyntaxAccepted": true,
+    "H265TransferSyntaxAccepted": true,
+    "DicomScpTimeout": 30,
+    "RemoteAccessAllowed": false,
+    "SslEnabled": false,
+    "AuthenticationEnabled": true,
+    "DicomModalitiesInDatabase" : true,
+    "RegisteredUsers": {
+        "ADM-USER": "${ADM_PASSWORD}",
+        "healthcheck": "${HEALTHCHECK_PASSWORD}"
+    },
     "OrthancExplorer2": {
+        "Enable": true,
         "IsDefaultUI": true,
         "UiOptions": {
-            "EnableShares": true,
-            "DefaultShareDuration": 0,
-            "ShareDurations": [
-                0,
-                1,
-                7,
-                15,
-                30,
-                90,
-                365
-            ],
             "EnableOpenInOhifViewer3": true,
             "OhifViewer3PublicRoot": "http://"${APP_URL}"/ohif/"
-        },
-        "Tokens": {
-            "InstantLinksValidity": 3600,
-            "ShareType": "ohif-viewer-publication"
         }
-    },
-    "AuthenticationEnabled": true,
-    "Authorization": {
-        "WebServiceTokenCreationBaseUrl": "http://orthanc-auth-service:8000/tokens/",
-        "WebServiceUsername": "${WEB_SERVICE_USERNAME}",
-        "WebServicePassword": "${WEB_SERVICE_PASSWORD}"  
     },
     "DicomWeb": {
         "Enable": true,
