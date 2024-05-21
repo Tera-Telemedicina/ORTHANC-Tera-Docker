@@ -3,14 +3,14 @@ services:
   # Container 1: Reverse Proxy (HTTPS)
   nginx:
     image: orthancteam/orthanc-nginx:24.5.0
-    depends_on: [orthanc, orthanc-auth-service, orthanc-for-shares]
+    depends_on: [orthanc]
     restart: unless-stopped
     ports: ["443:443"]
     volumes:
       - ./tls:/etc/nginx/tls
     environment:
       ENABLE_ORTHANC: "true"
-      ENABLE_ORTHANC_FOR_SHARES: "true"
+      ENABLE_ORTHANC_FOR_SHARES: "false"
       ENABLE_ORTHANC_TOKEN_SERVICE: "false"
       ENABLE_HTTPS: "true"
       ENABLE_OHIF: "true" 
@@ -30,17 +30,6 @@ services:
       - ./tmp/orthancADM-logs-docker:/logs
       - ./orthancADM.json:/etc/orthanc/orthanc.json:ro
     environment:
-      # Name
-      ORTHANC__NAME: "orthanc"
-      # PACS name
-      ORTHANC__DICOM_AET: "ORTHANC"
-      # Users with ADM privileges
-      ORTHANC__REGISTERED_USERS: |
-        {
-            "${ADM_NAME}": "${ADM_PASSWORD}",
-            "healthcheck": "${HEALTHCHECK_PASSWORD}"
-        }
-
       # Console Logs
       VERBOSE_ENABLED: "true"
       VERBOSE_STARTUP: "true"
@@ -48,18 +37,6 @@ services:
       # Logs
       LOGDIR: "/logs"
       ORTHANC__DE_IDENTIFY_LOGS: "false"
-
-      STONE_WEB_VIEWER_PLUGIN_ENABLED: "true"
-      DICOM_WEB_PLUGIN_ENABLED: "true"
-
-      # Switch storage to AWS S3
-      # Turn off the default File System storage system
-      AWS_S3_STORAGE_PLUGIN_ENABLED: "true"
-
-      # Change storage to PostgreSQL 
-      # Turn off the default sqLite Database 
-      # Change indexing to PostegreSQL
-      POSTGRESQL_PLUGIN_ENABLED: "true"
 
     # Activate a healthcheck service
     labels:
@@ -74,52 +51,6 @@ services:
       retries: 2
       interval: 3s
       timeout: 2s
-
-  # Container 5: Manage Share Tokens
-  orthanc-for-shares:
-    image: orthancteam/orthanc:24.5.0
-    restart: unless-stopped
-    volumes:
-      - ./tmp/orthancSHARE-logs-docker:/logs
-      - ./orthancSHARE.json:/etc/orthanc/orthanc.json:ro
-      - ./tls:/tls
-    environment:
-      # Name
-      ORTHANC__NAME: "orthancFS"
-
-      # Console Logs
-      VERBOSE_ENABLED: "true"
-      VERBOSE_STARTUP: "true"
-
-      # Logs
-      LOGDIR: "/logs"
-      ORTHANC__DE_IDENTIFY_LOGS: "false"
-
-      STONE_WEB_VIEWER_PLUGIN_ENABLED: "true"
-      DICOM_WEB_PLUGIN_ENABLED: "true"
-
-      # Switch storage to AWS S3
-      # Turn off the default File System storage system
-      AWS_S3_STORAGE_PLUGIN_ENABLED: "true"
-
-      # Change storage to PostgreSQL 
-      # Turn off the default sqLite Database 
-      # Change indexing to PostegreSQL
-      POSTGRESQL_PLUGIN_ENABLED: "true"
-
-  # Container 5: Authorization
-  orthanc-auth-service:
-    image: orthancteam/orthanc-auth-service:24.5.0
-    restart: unless-stopped
-    environment:
-      PUBLIC_ORTHANC_ROOT: "${PUBLIC_ORTHANC_ROOT}"
-      PUBLIC_LANDING_ROOT: "${PUBLIC_LANDING_ROOT}"
-      PUBLIC_OHIF_ROOT: "${PUBLIC_OHIF_ROOT}"
-      SECRET_KEY: "${SECRET_KEY}"
-      USERS: |
-        {
-          "${WEB_SERVICE_USERNAME}": "${WEB_SERVICE_PASSWORD}"
-        }
 
   # Container 6: Supervision
   # Activate an AutoHeal service
