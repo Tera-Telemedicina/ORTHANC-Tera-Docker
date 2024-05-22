@@ -13,14 +13,14 @@ services:
 
   # Container 2: Viewer
   ohif:
-    image: orthancteam/ohif-v3:24.5.0
+    image: orthancteam/ohif-v3:24.5.1
     #volumes:
       #- ./ohif-app-config.js:/usr/share/nginx/html/app-config.js
     restart: unless-stopped
 
   #Container 3: ORTHANC PACS (DISME e DICOMweb)
   orthanc:
-    image: orthancteam/orthanc:24.5.0
+    image: orthancteam/orthanc:24.5.1
     restart: unless-stopped
     volumes:
       - ./tmp/orthancADM-logs-docker:/logs
