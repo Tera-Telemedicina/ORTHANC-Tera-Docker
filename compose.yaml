@@ -5,7 +5,7 @@ services:
     image: nginx:1.25.5-alpine
     depends_on: [orthanc]
     restart: unless-stopped
-    ports: ["80":"80", 443:443", "104:104"]
+    ports: ["80":"80", "443:443", "104:104"]
     volumes:
       - ./tls:/etc/nginx/tls
       - ./default.conf:/etc/nginx/conf.d/default.conf
