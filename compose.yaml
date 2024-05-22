@@ -2,18 +2,14 @@ services:
 
   # Container 1: Reverse Proxy (HTTPS)
   nginx:
-    image: orthancteam/orthanc-nginx:24.5.0
+    image: nginx:1.25.5-alpine
     depends_on: [orthanc]
     restart: unless-stopped
-    ports: ["443:443"]
+    ports: ["443:443", "104:104"]
     volumes:
       - ./tls:/etc/nginx/tls
-    environment:
-      ENABLE_ORTHANC: "true"
-      ENABLE_ORTHANC_FOR_SHARES: "false"
-      ENABLE_ORTHANC_TOKEN_SERVICE: "false"
-      ENABLE_HTTPS: "true"
-      ENABLE_OHIF: "true" 
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+
 
   # Container 2: Viewer
   ohif:
