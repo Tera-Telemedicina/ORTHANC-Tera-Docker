@@ -53,6 +53,7 @@ services:
     image: orthancteam/orthanc:24.5.1
     restart: unless-stopped
     ports:
+      - "443:8042"
       - "2762:4242"
     volumes:
       - ./tmp/orthancDICOM-logs-docker:/logs
