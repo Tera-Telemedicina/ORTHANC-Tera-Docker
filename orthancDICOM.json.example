@@ -13,7 +13,7 @@
     "DicomTlsEnabled": true,
     "DicomTlsCertificate": "/tls/crt.pem",
     "DicomTlsPrivateKey": "/tls/key.pem",
-    "DicomTlsTrustedCertificates": "/tls/dcmtk.pem",
+    "DicomTlsTrustedCertificates": "/tls/dcmtk.crt",
     "DicomTlsRemoteCertificateRequired": false,
     "DefaultEncoding": "UTF8",
     "AcceptedTransferSyntaxes": [
