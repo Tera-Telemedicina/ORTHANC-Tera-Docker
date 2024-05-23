@@ -53,7 +53,6 @@ services:
     image: orthancteam/orthanc:24.5.1
     restart: unless-stopped
     ports:
-      - "443:8042"
       - "2762:4242"
     volumes:
       - ./tmp/orthancDICOM-logs-docker:/logs
@@ -67,20 +66,6 @@ services:
       # Logs
       LOGDIR: "/logs"
       ORTHANC__DE_IDENTIFY_LOGS: "false"
-
-    # Activate a healthcheck service
-    labels:
-      - "autoheal=true"
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "/probes/test-aliveness.py --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD} > ./logs/healthcheck.log 2>&1"
-        ]
-      start_period: 10s
-      retries: 2
-      interval: 3s
-      timeout: 2s
 
   # Container 5: Supervision
   # Activate an AutoHeal service
