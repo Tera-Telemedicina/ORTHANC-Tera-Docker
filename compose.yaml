@@ -74,7 +74,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "/probes/test-aliveness.py --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD} > ./log/healthcheck.log 2>&1"
+          "/probes/test-aliveness.py --user=healthcheck --pwd=${HEALTHCHECK_PASSWORD} > ./logs/healthcheck.log 2>&1"
         ]
       start_period: 10s
       retries: 2
