@@ -1,0 +1,64 @@
+{
+    "Name": "${NAME_YOUR_PACS}",
+    "ConcurrentJobs": 0,
+    "JobsEngineThreadsCount": {
+        "ResourceModification": 1
+    },
+    "HttpServerEnabled": false,
+    "WebDavEnabled": false,
+    "DicomServerEnabled": true,
+    "DicomAet": "${YOUR_AET_NAME}",
+    "DicomCheckCalledAet": true,
+    "DicomPort": 4242,
+    "DicomTlsEnabled": true,
+    "DicomTlsCertificate": "/tls/crt.pem",
+    "DicomTlsPrivateKey": "/tls/key.pem",
+    "DicomTlsTrustedCertificates": "/tls/dcmtk.pem",
+    "DicomTlsRemoteCertificateRequired": false,
+    "DefaultEncoding": "UTF8",
+    "AcceptedTransferSyntaxes": [
+        "1.2.840.10008.1.*"
+    ],
+    "DeflatedTransferSyntaxAccepted": true,
+    "JpegTransferSyntaxAccepted": true,
+    "Jpeg2000TransferSyntaxAccepted": true,
+    "JpegLosslessTransferSyntaxAccepted": true,
+    "JpipTransferSyntaxAccepted": true,
+    "Mpeg2TransferSyntaxAccepted": true,
+    "RleTransferSyntaxAccepted": true,
+    "Mpeg4TransferSyntaxAccepted": true,
+    "H265TransferSyntaxAccepted": true,
+    "DicomScpTimeout": 30,
+    "RemoteAccessAllowed": true,
+    "SslEnabled": false,
+    "AuthenticationEnabled": false,
+    "RegisteredUsers": {
+        "ADM-USER": "${ADM_PASSWORD}",
+        "healthcheck": "${HEALTHCHECK_PASSWORD}"
+    },
+    "OrthancExplorer2": {
+        "Enable": true,
+        "IsDefaultUI": true,
+        "UiOptions": {
+            "EnableOpenInOhifViewer3": true,
+            "OhifViewer3PublicRoot": "http://"${APP_URL}"/ohif/"
+        }
+    },
+    "PostgreSQL": {
+        "EnableIndex": true,
+        "Host": "${HOST}",
+        "Port": "${PORT}",
+        "Database": "${DATABASE}",
+        "Username": "${USERNAME}",
+        "Password": "${PASSWORD}",
+        "EnableSsl": true
+    },
+    "AwsS3Storage": {
+        "BucketName": "${BUCKET_NAME}",
+        "Region": "${REGION}",
+        "AccessKey": "${ACCESS_KEY}",
+        "SecretKey": "${SECRET_KEY}",
+        "StorageStructure": "flat",
+        "UseTransferManager": true
+    }
+}

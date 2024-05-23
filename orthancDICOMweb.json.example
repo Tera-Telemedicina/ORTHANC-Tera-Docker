@@ -1,0 +1,52 @@
+// Change all values that are as environment variables for Docker Compose to the actual values of the secrets.
+
+// Or use this json in the environment variable inside Docker Compose ORTHANC_JSON:
+
+{
+    "Name": "${NAME_YOUR_PACS}",
+    "ConcurrentJobs": 0,
+    "JobsEngineThreadsCount": {
+        "ResourceModification": 1
+    },
+    "HttpServerEnabled": true,
+    "HttpPort": 8042,
+    "HttpDescribeErrors": true,
+    "HttpCompressionEnabled": false,
+    "WebDavEnabled": false,
+    "RemoteAccessAllowed": true,
+    "SslEnabled": false,
+    "AuthenticationEnabled": true,
+    "RegisteredUsers": {
+        "ADM-USER": "${ADM_PASSWORD}",
+        "healthcheck": "${HEALTHCHECK_PASSWORD}"
+    },
+    "OrthancExplorer2": {
+        "Enable": true,
+        "IsDefaultUI": true,
+        "UiOptions": {
+            "EnableOpenInOhifViewer3": true,
+            "OhifViewer3PublicRoot": "http://"${APP_URL}"/ohif/"
+        }
+    },
+    "DicomWeb": {
+        "Enable": true,
+        "PublicRoot": "/orthanc/dicom-web/"
+    },
+    "PostgreSQL": {
+        "EnableIndex": true,
+        "Host": "${HOST}",
+        "Port": "${PORT}",
+        "Database": "${DATABASE}",
+        "Username": "${USERNAME}",
+        "Password": "${PASSWORD}",
+        "EnableSsl": true
+    },
+    "AwsS3Storage": {
+        "BucketName": "${BUCKET_NAME}",
+        "Region": "${REGION}",
+        "AccessKey": "${ACCESS_KEY}",
+        "SecretKey": "${SECRET_KEY}",
+        "StorageStructure": "flat",
+        "UseTransferManager": true
+    }
+}
